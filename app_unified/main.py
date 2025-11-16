@@ -28,6 +28,17 @@ class MarketChartParams(BaseModel):
     days: int = Field(gt=0, description="Number of days must be greater than 0")
 
 
+class PricePoint(BaseModel):
+    timestamp: datetime
+    price: float
+    
+class MarketChartResponse(BaseModel):
+    prices: list[PricePoint]
+
+    
+    
+
+
 def fetch_market_chart_2_business(symbol: Symbol, currency: Currency, days: int)-> Dict[str, Any]:    
     '''
     Business logic layer for fetching CoinGecko market charts.
@@ -97,7 +108,7 @@ from fastapi import FastAPI, HTTPException
 app_unified = FastAPI(title="CoinGecko Market Chart API", version="1.0.0")
 
 @app_unified.get('/market_chart')
-def get_market_chart_endpoint(
+def get_market_chart_endpoint_1(
     symbol: Symbol, 
     currency: Currency, 
     days: int):
@@ -124,8 +135,53 @@ def get_market_chart_endpoint(
 
 
 
+def convert_raw_to_clean_data(data: Dict[str, Any]) -> MarketChartResponse:
+    '''
+    Convert CoinGecko raw JSON into a clean, typed response model.
+    
+    Expected raw format:
+    data['prices'] = [
+        [timestamp_ms, price], 
+        ...
+    ]    
+    '''
+    raw_prices = data.get('prices', [])
+    
+    prices: list[PricePoint] = []
+    
+    for item in raw_prices:
+        if not (isinstance(item, list) and len(item) == 2): 
+            raise ValueError("Invalid price point format")
+        ts_ms, price = item
+        
+        ts = datetime.fromtimestamp(ts_ms / 1000.0)
+        price_point = PricePoint(timestamp=ts, price=price)
+        prices.append(price_point)
+    
+    return MarketChartResponse(prices=prices)
 
 
+@app_unified.get('/market-chart/clean', 
+                 response_model = MarketChartResponse, 
+                 summary="Get clean market chart data", 
+                 description="Returns typed market chart data with timestamps and prices.")
+def get_market_chart_clean_endpoint(symbol: Symbol, currency: Currency, days: int):
+    """
+        Clean version of market-chart endpoint.
+
+        Query params:
+        - symbol: BTC, ETH, XRP
+        - currency: USD, EUR, GBP, AUD, CHF, JPY
+        - days: int > 0
+        """
+    try:
+        raw_data = fetch_market_chart_2_business(symbol, currency, days)
+        clean_data = convert_raw_to_clean_data(raw_data)
+        return clean_data
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=e.errors())
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
 
 
 if __name__ == "__main__":
