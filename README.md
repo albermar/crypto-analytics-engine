@@ -1,78 +1,76 @@
 # Crypto Market Data Fetcher (Clean Architecture)
 
-Small backend project to fetch and visualize crypto market data from external providers (starting with CoinGecko), using a clean, layered architecture.
+Small backend project to fetch and visualize crypto market data from external providers (starting with **CoinGecko**), using a clean, layered architecture.
 
-Current focus: **BTC/ETH price history endpoint** with proper separation of concerns and professional error handling.
+Current focus: **BTC/ETH price history endpoint**, with proper separation of concerns and professional error handling.
 
 ---
 
-## Folder structure
+## Architecture Overview
 
 ```
 app/
- ├── 1-api/             # FastAPI routes + Pydantic models
- ├── 2-business/        # Use cases (application / business logic)
- ├── 3-domain/          # Domain entities (dataclasses, value objects)
- ├── 4-infrastructure/  # External providers (CoinGecko, etc.)
+ ├── 1-api/             # FastAPI routes + Pydantic models 
+ ├── 2-business/        # Use cases (application / business logic) 
+ ├── 3-domain/          # Domain entities (dataclasses, value objects) 
+ ├── 4-infrastructure/  # External providers (CoinGecko client) 
  └── 5-tests/           # Unit / integration tests
-
 ```
 
 ---
 
-## Master table (architecture & errors)
-
-High-level contract of each layer: what it does, what it validates and how errors flow.
-
-| Layer | Input | Output | Responsibility | Errors (Own/Input) | Errors (Received) | Errors (own/processes) |
-| --- | --- | --- | --- | --- | --- | --- |
-| **API** |  |  |  |  |  |  |
-| **Business** | - `Provider` (enum)<br>-  `Symbol` (enum)<br>- `Currency` (enum)<br>- days: `int` | Domain entity:<br>    `MarketDataChart` | - Decide what infrastructure to call by provider<br>- Call infrastructure to obtain raw data<br>- Converts raw data to clean (Raw to `MarketDataChart` and `PricePoint`) | - `BusinessValidationError` (days ≤ 0 or empty params) <br>- `BusinessProviderNotCompatible` (symbol/currency not supported) | -  `BusinessProviderGeneralError` (we don’t have data)<br>        ← ExternalApiTimeout<br>        ← ExternalApiError  <br>        ← ExternalApiMalformedResponse  |  |
-| **Infrastructure** | - Provider url: `str`<br>- symbol: `str`<br>- currency: `str`<br>- days: `int` | - Raw Dict | - Call external API for raw data |  - `InfrastructureValidationError` (days ≤ 0 or empty params) | - `InfrastructureExternalApiTimeout` ← httpx.TimeoutException<br>- `InfrastructureExternalApiError`  ← (httpx.RequestError) or (non 2xx HTTP status) | - `InfrastructureExternalApiMalformedResponse` ← (JSON decode error) or (invalid/missing ‘prices’ key) |
-
-## Domain entities
+## Domain Entities
 
 ```python
+from enum import Enum
+from datetime import datetime
+
 class Symbol(str, Enum):
-	  BTC = "bitcoin"     
-    ETH = "ethereum"   
-    XRP = "ripple"   
+    BTC = "bitcoin"
+    ETH = "ethereum"
+    XRP = "ripple"
 
 class Currency(str, Enum):
-    USD = "usd"     
-    EUR = "eur"   
-    GBP = "gbp" 
+    USD = "usd"
+    EUR = "eur"
+    GBP = "gbp"
     AUD = "aud"
     CHF = "chf"
-    JPY = "jpy" 
+    JPY = "jpy"
 
 class Provider(str, Enum):
-		COINGECKO: "coingecko"
-		
----
+    COINGECKO = "coingecko"
+
 
 class PricePoint:
-		timestamp: datetime
-		price: float
-		
+    timestamp: datetime
+    price: float
+
+
 class MarketChartData:
-		symbol: Symbol
-		currency: Currency
-		points: list[PricePoint]
+    symbol: Symbol
+    currency: Currency
+    points: list[PricePoint]
 ```
 
-## Api Pydantic models
+---
+
+## API Pydantic Models
 
 ```python
-class PrincePointResponse(BaseModel):
-		timestamp: datetime
-		price: float
-		
-class MarketChartDataResponse(BaseModel:
-		symbol: Symbol
-		currency: Currency
-		points: list[PrincePointResponse]
-		
+from pydantic import BaseModel
+from datetime import datetime
+
+class PricePointResponse(BaseModel):
+    timestamp: datetime
+    price: float
+
+
+class MarketChartDataResponse(BaseModel):
+    symbol: Symbol
+    currency: Currency
+    points: list[PricePointResponse]
+
 
 class MarketChartRequest(BaseModel):
     symbol: Symbol
@@ -80,32 +78,17 @@ class MarketChartRequest(BaseModel):
     days: int
 ```
 
-## General diagram (high-level flow)
-
 ---
 
-```python
-[ Client ]
-    |
-    v
-[ API layer ]
-  - FastAPI endpoints
-  - Pydantic request/response models
-  - HTTPException mapping
-    |
-    v
-[ Business layer ]
-  - Use cases (e.g. get_market_chart)
-  - Validate semantic rules
-  - Call infrastructure providers
-    |
-    v
-[ Infrastructure layer ]
-  - CoinGecko provider (httpx)
-  - Network calls + JSON parsing
-  - Wrap external errors
-    |
-    v
-[ External API: CoinGecko ]
+## How to Run
 
+Use **uvicorn** to run the FastAPI app:
+
+```bash
+uvicorn app.main:app --reload
 ```
+
+### Endpoints
+
+- `GET /market-chart` — fetch historical market price data for a given symbol and currency.
+
