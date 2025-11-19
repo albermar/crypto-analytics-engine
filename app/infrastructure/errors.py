@@ -1,21 +1,25 @@
 class InfrastructureProviderNotCompatibleError(Exception):
-    '''
+    '''__
     Raises if the Symbol or Currency isn't supported by the asked provider
     '''
-    pass
-
-
-
+    
 class InfrastructureBadURL(Exception):
-    pass
-
-
-
+    '''__
+    Raises if it's impossible to execute the request due to a lack of URL, Tokens, or whatever.  
+    '''
+    
 class InfrastructureExternalApiTimeout(Exception):
-    pass
-
+    '''__
+    httpx.TimeoutException
+    '''
+    
 class InfrastructureExternalApiError(Exception):
-    pass
-
+    '''__ 
+     httpx.RequestError or non 2xx HTTP status codes from external API
+    '''
+    
 class InfrastructureExternalApiMalformedResponse(Exception):
-    pass
+    '''
+    JSONDecodeError
+    '''
+    
