@@ -6,6 +6,8 @@ from app.domain.entities import Symbol, Currency, Provider
 from app.infrastructure.mapper import map_provider_symbol_id, map_provider_currency_id
 import pytest
 
+#Symbol Tests
+
 TEST_SYMBOL_ID_OK = [
     (Symbol.BTC, Provider.COINGECKO, 'bitcoin'),
     (Symbol.ETH, Provider.COINGECKO, 'ethereum'),
@@ -22,20 +24,7 @@ TEST_UNMAPPEDSYMBOL_ERROR = [
     (Provider.COINGECKO, InfrastructureProviderNotCompatibleError),
 ]
 
-def test_symbol_id_ok():
-    for sym, prov, expected_id in TEST_SYMBOL_ID_OK:
-        assert map_provider_symbol_id(sym, prov) == expected_id
-
-def test_symbol_types_ok():
-    for sym, prov in TEST_SYMBOL_SUPPORTED:
-        assert isinstance(map_provider_symbol_id(sym, prov), str)
-        
-def test_unmapped_symbol_error():
-    for prov, exc in TEST_UNMAPPEDSYMBOL_ERROR:
-        with pytest.raises(exc):
-            map_provider_symbol_id(Symbol.__UNMAPPED__, prov)
-
-
+#Currency Tests
 
 TEST_CURRENCY_ID_OK  = [
     (Currency.EUR, Provider.COINGECKO, 'eur'), 
@@ -57,6 +46,19 @@ TEST_CURRENCY_SUPPORTED  = [
 TEST_UNMAPPEDCURRENCY_ERROR = [
     (Provider.COINGECKO, InfrastructureProviderNotCompatibleError)
 ]
+
+def test_symbol_id_ok():
+    for sym, prov, expected_id in TEST_SYMBOL_ID_OK:
+        assert map_provider_symbol_id(sym, prov) == expected_id
+
+def test_symbol_types_ok():
+    for sym, prov in TEST_SYMBOL_SUPPORTED:
+        assert isinstance(map_provider_symbol_id(sym, prov), str)
+        
+def test_unmapped_symbol_error():
+    for prov, exc in TEST_UNMAPPEDSYMBOL_ERROR:
+        with pytest.raises(exc):
+            map_provider_symbol_id(Symbol.__UNMAPPED__, prov)
 
 def test_currency_id_ok():
     for curr, prov, expected_id in TEST_CURRENCY_ID_OK :

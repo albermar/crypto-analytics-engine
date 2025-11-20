@@ -9,11 +9,8 @@ from app.domain.entities import PricePoint, MarketChartData
 import httpx 
 
 def infra_get_parsed_market_chart_coingecko(    sym: Symbol,     curr: Currency,     days: int) -> MarketChartData:
-    raw_data =      infra_get_raw_market_chart_coingecko(sym, curr, days)
-    #raw data must have the 'prices' field
-    if (not isinstance(raw_data['prices'], list)) or ('prices' not in raw_data) :
-        raise errors.InfrastructureExternalApiMalformedResponse("Missing 'prices' in CoinGecko response")    
-    clean_data =    infra_clean_raw_market_chart_coingecko(raw_data)
+    raw_data =      infra_get_raw_market_chart_coingecko(sym, curr, days)    
+    clean_data =    infra_clean_raw_market_chart_coingecko(raw_data, 'prices')
     market_chart = MarketChartData(sym, curr, clean_data)
     return market_chart
 
@@ -73,7 +70,10 @@ def infra_get_raw_market_chart_coingecko(    sym: Symbol,     curr: Currency,   
     #in this point we have the parsed JSON data. 
     return parsed_data
 
-def infra_clean_raw_market_chart_coingecko(raw_data: dict) -> list[PricePoint]:
+def infra_clean_raw_market_chart_coingecko(raw_data: dict, mandatory_key: str = 'prices') -> list[PricePoint]:
+    #raw data must have the 'prices' field
+    if (mandatory_key not in raw_data) or (not isinstance(raw_data[mandatory_key], list)):
+        raise errors.InfrastructureExternalApiMalformedResponse("Missing 'prices' in CoinGecko response")        
     price_points = []
     for item in raw_data.get('prices', []):
         timestamp = datetime.fromtimestamp(item[0] / 1000.0)
