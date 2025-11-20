@@ -6,7 +6,6 @@ from app.domain.entities import Symbol, Currency, Provider
 from app.infrastructure.mapper import map_provider_symbol_id, map_provider_currency_id
 import pytest
 
-#Symbol Tests
 
 TEST_SYMBOL_ID_OK = [
     (Symbol.BTC, Provider.COINGECKO, 'bitcoin'),
@@ -24,8 +23,6 @@ TEST_UNMAPPEDSYMBOL_ERROR = [
     (Provider.COINGECKO, InfrastructureProviderNotCompatibleError),
 ]
 
-#Currency Tests
-
 TEST_CURRENCY_ID_OK  = [
     (Currency.EUR, Provider.COINGECKO, 'eur'), 
     (Currency.USD, Provider.COINGECKO, 'usd'),
@@ -34,6 +31,7 @@ TEST_CURRENCY_ID_OK  = [
     (Currency.CHF, Provider.COINGECKO, 'chf'),
     (Currency.JPY, Provider.COINGECKO, 'jpy')
 ]
+
 TEST_CURRENCY_SUPPORTED  = [
     (Currency.EUR, Provider.COINGECKO), 
     (Currency.USD, Provider.COINGECKO),
