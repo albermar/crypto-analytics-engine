@@ -1,12 +1,23 @@
 #Here I'm going to create the function that will ask coingecko for market data and return the raw data as dictionary
 
+from datetime import datetime
 from app.infrastructure import errors
 from app.domain.entities import Symbol, Currency, Provider
 from app.infrastructure.mapper import map_provider_currency_id, map_provider_symbol_id
+from app.domain.entities import PricePoint, MarketChartData
 
 import httpx 
 
-def infra_get_market_chart_coingecko(    sym: Symbol,     curr: Currency,     days: int) -> dict:
+def infra_get_parsed_market_chart_coingecko(    sym: Symbol,     curr: Currency,     days: int) -> MarketChartData:
+    raw_data =      infra_get_raw_market_chart_coingecko(sym, curr, days)
+    #raw data must have the 'prices' field
+    if (not isinstance(raw_data['prices'], list)) or ('prices' not in raw_data) :
+        raise errors.InfrastructureExternalApiMalformedResponse("Missing 'prices' in CoinGecko response")    
+    clean_data =    infra_clean_raw_market_chart_coingecko(raw_data)
+    market_chart = MarketChartData(sym, curr, clean_data)
+    return market_chart
+
+def infra_get_raw_market_chart_coingecko(    sym: Symbol,     curr: Currency,     days: int) -> dict:
     '''
     Fetch market chart data from CoinGecko API.
     '''
@@ -53,16 +64,28 @@ def infra_get_market_chart_coingecko(    sym: Symbol,     curr: Currency,     da
     # 5xx: Server errors (e.g., 500 Internal Server Error)
     # Everything that is not 200 means that the request was not successful.
     if response.status_code != 200:
-        raise errors.InfrastructureExternalApiError
+        raise errors.InfrastructureExternalApiError(f'CoinGecko API error {response.status_code} for URL: {URL}\nResponse body: {response.text[:200]}')
     #in this point the status code is 200, we need to parse the JSON response:    
     try:    
         parsed_data = response.json()
     except Exception as e:
         raise errors.InfrastructureExternalApiMalformedResponse(e)
-    #in this point we have the parsed JSON data, we return it:
+    #in this point we have the parsed JSON data. 
     return parsed_data
 
+def infra_clean_raw_market_chart_coingecko(raw_data: dict) -> list[PricePoint]:
+    price_points = []
+    for item in raw_data.get('prices', []):
+        timestamp = datetime.fromtimestamp(item[0] / 1000.0)
+        price = float(item[1])
+        price_point = PricePoint(timestamp=timestamp, price=price)
+        price_points.append(price_point)        
+    return price_points
+
+
+
 if __name__ == "__main__":
-    data = infra_get_market_chart_coingecko(Symbol.BTC, Currency.USD, 7)
-    for x in data['prices']:
-        print(x)
+    data = infra_get_parsed_market_chart_coingecko(Symbol.BTC, Currency.USD, 1)    
+    for x in data.points:
+        print(f'Time: {x.timestamp}, Price: {x.price}')
+    print(f'Nº of points: {len(data.points  )}')
