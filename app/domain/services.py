@@ -51,8 +51,9 @@ def fetch_market_chart(
     
     return data
 
-
+    
 if __name__ == "__main__":
+    
     #Simple test of the service function
     try:
         chart = fetch_market_chart(Symbol.BTC, Currency.USD, 20, Provider.COINGECKO)
@@ -60,4 +61,4 @@ if __name__ == "__main__":
         for point in chart.points[-5:]:  # Print first 5 points
             print(f'Time: {point.timestamp}, Price: {point.price}')
     except Exception as e:
-        print(f'Error: {e}')
+         print(f'Error: {e}')  

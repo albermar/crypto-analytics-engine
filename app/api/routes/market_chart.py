@@ -33,10 +33,14 @@ def get_market_chart(symbol: Symbol, currency: Currency, days: int, provider: Pr
     
     #return pydantic model response
     return MarketChartResponse.from_domain(data) #Pydantic model
-    
 
-    
-    
+@router.get('/stats', 
+            response_model = StatsResponse,
+            summary = 'Fetch statistics for market chart data',
+            description='Retrieve statistical information (mean, median, std deviation) for historical market chart data of a specified cryptocurrency, currency, and number of days.')
+def get_market_chart_stats(symbol: Symbol, currency: Currency, days: int, provider: Provider):
+    pass
+
 
 
 
