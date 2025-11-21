@@ -2,8 +2,8 @@
 
 # app/services/coingecko/service.py
 
-from app.services.coingecko.client import get_market_chart 
-from app.models.coingecko import SYMBOL_MAP, CURRENCY_MAP
+from app_obsolete.services.coingecko.client import get_market_chart 
+from app_obsolete.models.coingecko import SYMBOL_MAP, CURRENCY_MAP
 
 def fetch_market_chart(symbol: str, currency: str, days: int):
     """Business logic layer for fetching CoinGecko market charts."""
