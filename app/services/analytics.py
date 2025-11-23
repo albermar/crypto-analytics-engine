@@ -47,48 +47,34 @@ def compute_stats(df: pd.DataFrame, stats_key: str) -> dict:
     
     return result_dic
 
-# compute_returns
-# compute_rolling_window
-# resample_price_series
-def compute_returns (df: pd.DataFrame) -> pd.DataFrame:
-    '''
-    This function will add 2 columns to the price series, with same length
-    pct_change: % of change respect the PREVIOUS point (i-(i-1))/(i-1) * 100
-    acum_pct_change: % of change respect the FIRST point (i-(0))/(0) * 100
-    '''
-    series = _validate_numeric_series(df, 'price')    
+def compute_returns (df: pd.DataFrame, stats_key: str) -> None:
+    series = _validate_numeric_series(df, stats_key)
 
-    #here we have the series with prices.
-    #content example of series:
-    #how do we access prices? 
-    # df['price']
-    # df.price
-    # timestamp
-    # 2024-01-01 00:00:00    30000.0
-    # 2024-01-01 01:00:00    30100
+    df['pct_change'] = series.pct_change() * 100    
+    df['acum_pct_change'] = (series - series.iloc[0]) / series.iloc[0] * 100
 
-    df = df.copy()  # to avoid modifying the original DataFrame
-    #compute the pct change manually:
-    pct_change_label = pcl = 'pct_change'
-    for i in range(len(df)):
-        if i == 0:
-            df.at[i]
-        else:
-            df.at[i, pcl] =
+def compute_rolling_window(df: pd.DataFrame, window_size: int, stats_key: str) -> None:
+    series = _validate_numeric_series(df, stats_key)
+    df[f'rolling_mean_{window_size}'] = series.rolling(window=window_size).mean()
 
+def resample_price_series(df: pd.DataFrame, stats_key: str, rule: str) -> pd.DataFrame:
+    series = _validate_numeric_series(df, stats_key)
+    #shall we make a copy? answer: yes, to avoid modifying the original df
+    df_resampled = df.copy()
+    df_resampled.set_index('timestamp', inplace=True) #Why inplace must be true? because we want to modify the df_resampled directly
+    resampled_df = series.resample(rule).ohlc().reset_index()
+        
+    return resampled_df
 
-    
-
-
-    return series
 
 if __name__ == "__main__":
     #test convert_market_chart_data_to_dataframe witha  marketchart data example:
     from app.domain.entities import PricePoint
      #sample poins is a list[PricePoint] 
     sample_points = [ ]
-    for i in range(20):
-        p = PricePoint(timestamp=datetime(2024, 1, 1, 0, 0), price = random.random() + i**(1.25))
+    for i in range(21):
+        #ensure datetimes are increasing 1 day from each other
+        p = PricePoint(timestamp=datetime(2024, 5, 11, 0, 0) + pd.Timedelta(days=i), price = 100+i)
         sample_points.append(p)
         
     sample_chart = MarketChartData(Symbol.BTC, Currency.USD, sample_points)
@@ -102,6 +88,11 @@ if __name__ == "__main__":
     #print df dataframe:
     #print(df)
 
-    df_with_returns = compute_returns(df)
-    print(df_with_returns.head(10))
+    compute_returns(df, stats_key='price')    
+    compute_rolling_window(df, window_size=7, stats_key='price')
+    print(df)    
     
+    df_resample_1W = df[['price', 'timestamp']].copy()
+    df_resample_1W = df_resample_1W.resample('Y', on='timestamp').ohlc()
+    print(df_resample_1W)
+    #print(df_resample_1W)

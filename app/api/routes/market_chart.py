@@ -70,9 +70,6 @@ def get_market_chart_stats(symbol: Symbol, currency: Currency, days: int, provid
             summary = 'Fetch market chart data as DataFrame',
             description='Retrieve historical market chart data for a specified cryptocurrency, currency, and number of days in a tabular DataFrame format.')
 def get_market_chart_dataframe(symbol: Symbol, currency: Currency, days: int, provider: Provider):
-    
-
-    
     try:
         data = fetch_market_chart(symbol, currency, days, provider) #Domain entity MarketChartData        
          
@@ -96,3 +93,5 @@ def get_market_chart_dataframe(symbol: Symbol, currency: Currency, days: int, pr
     
     #Convert DataFrame to DataFrameResponse
     return DataFrameResponse.from_dataframe(df)
+
+

@@ -73,7 +73,14 @@ def compute_market_chart_stats(
         raise errors_domain.BusinessComputationError(f'Error computing statistics from market chart data: {e}')
     return stats    
 
-        
+
+def compute_returns(
+    symbol: Symbol, 
+    currency: Currency, 
+    days: int, 
+    provider: Provider = DEFAULT_PROVIDER 
+    ) -> dict:  
+    pass
 
 if __name__ == "__main__":
     
