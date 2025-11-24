@@ -49,10 +49,10 @@ class MarketChartData:
     currency: Currency
     points: list[PricePoint]
     
-    def __init__(self, sym: Symbol, curr: Currency, pts: list[PricePoint]):
-        self.symbol = sym
-        self.currency = curr
-        self.points = pts #Reference assignment, no copy of the list, keep in mind.
+    def __init__(self, symbol: Symbol, currency: Currency, points: list[PricePoint]):
+        self.symbol = symbol
+        self.currency = currency
+        self.points = points #Reference assignment, no copy of the list, keep in mind.
         
 
 class ResampleFrequency(Enum):

@@ -69,8 +69,8 @@ def get_market_chart_stats(symbol: Symbol, currency: Currency, days: int, provid
     return stats
 
 @router.get('/dataframe', response_model = DataFrameResponse,
-            summary = 'Fetch market chart data as DataFrame',
-            description='Retrieve historical market chart data for a specified cryptocurrency, currency, and number of days in a tabular DataFrame format.')
+            summary =  'Fetch enriched market chart data as DataFrame',
+            description='Retrieve enriched historical market chart data for a specified cryptocurrency, currency, and number of days, with optional analytics such as resampling frequency, rolling window, normalization, and volatility calculation.')
 def get_market_chart_dataframe(
     symbol: Symbol, 
     currency: Currency, 

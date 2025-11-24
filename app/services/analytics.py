@@ -14,6 +14,10 @@ def _validate_numeric_series(df: pd.DataFrame, column: str) -> pd.Series:
     if column not in df.columns:
         raise KeyError(f"Column '{column}' not found in DataFrame")
     
+    #check if it's numeric
+    if not pd.api.types.is_numeric_dtype(df[column]):
+        raise ValueError(f'Column {column} is not numeric')
+    
     series = df[column]
 
     if series.isna().all():
