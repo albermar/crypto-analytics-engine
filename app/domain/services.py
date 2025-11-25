@@ -5,6 +5,7 @@ from app.domain import errors as errors_domain
 import pandas as pd
 from app.services.analytics import (
     convert_market_chart_data_to_dataframe,
+    calculate_stats,
     compute_returns,
     compute_rolling_window,
     resample_price_series,
@@ -78,7 +79,7 @@ def compute_market_chart_stats(
     df = convert_market_chart_data_to_dataframe(marketchartdata=mcd)    
     try:
         #Compute stats of the DataFrame
-        stats = compute_stats(df = df, stats_key='price')    
+        stats = calculate_stats(df = df, stats_key='price')    
     except (ValueError, KeyError) as e:
         raise errors_domain.BusinessComputationError(f'Error computing statistics from market chart data: {e}')
     return stats

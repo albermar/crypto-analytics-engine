@@ -131,8 +131,9 @@ def compute_volatility(df: pd.DataFrame, price_key: str, window_size: int) -> No
     
     # Step 2: Compute the rolling window (of window_size elements) of the pct_change
     
-    df[vol_col_name] = aux_pct_changes.rolling(window=window_size).std()
+    df[vol_col_name] = aux_pct_changes.rolling(window=window_size).std() 
     
+    #print(df[vol_col_name].head(30))
     # No return, modifies df in place
     
 
