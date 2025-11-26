@@ -1,4 +1,6 @@
 # runner.py
+# Orquesta script to fetch enriched crypto price data and generate plots using specified parameters.
+
 import argparse
 from pathlib import Path
 

@@ -134,8 +134,7 @@ def get_market_chart_dataframe(
     #Convert Enriched DataFrame to DataFrameResponse
     return DataFrameResponse.from_dataframe(df)
 
-@router.get(
-    "/{symbol}/{currency}/plot-enriched",
+@router.get(    "/{symbol}/{currency}/plot-enriched",
     summary="Get enriched market chart plot as PNG",
     description=(
         "Return an enriched PNG plot including: price with rolling mean, resampled series, "

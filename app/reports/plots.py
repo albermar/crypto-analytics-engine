@@ -9,6 +9,7 @@ from app.services.analytics import (
 
 #Use matplotlib and potly
 
+#Not used in the endpoint, but kept for reference
 def plot_price(df: pd.DataFrame, out_path: str) -> None:
     
     df = df.copy()
@@ -26,7 +27,31 @@ def plot_price(df: pd.DataFrame, out_path: str) -> None:
     plt.savefig(out_path, format='png', dpi = 300, bbox_inches='tight')
     plt.close()
 
+#Not used in the endpoint, but kept for reference
+def plot_volatility(df: pd.DataFrame, out_path: str, volatility_window: int) -> None: 
+    #price and volatility in two axes in the same plot, because they have different scales
+    df = df.copy()
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    volatility_col = f'volatility_{volatility_window}'
+    fig, ax1 = plt.subplots(figsize=(12,6))
+    ax1.plot(df['timestamp'], df['price'], label='Price', color='blue', linewidth=2)
+    ax1.set_xlabel('Timestamp')
+    ax1.set_ylabel('Price', color='blue')
+    ax1.tick_params(axis='y', labelcolor='blue')
+    ax2 = ax1.twinx()
+    if volatility_col in df.columns:
+        ax2.plot(df['timestamp'], df[volatility_col], label='Volatility', color='red', linewidth=2)
+    ax2.set_ylabel('Volatility', color='red')
+    ax2.tick_params(axis='y', labelcolor='red')
+    plt.title('Price and Volatility Over Time')
+    fig.tight_layout()
+    plt.grid(True)
+    plt.legend()
+    # Save in png
+    plt.savefig(out_path, format='png', dpi = 300, bbox_inches='tight')
+    plt.close()
 
+#This is the main function used in the endpoint. It returns a PNG with 3 subplots containing the price and all the analytics contained in the DataFrame (the function itself detects which analytics are present in the DataFrame)
 def plot_enriched_price(
     df: pd.DataFrame,
     out_path: str,
@@ -51,7 +76,7 @@ def plot_enriched_price(
       - Subplot 2: % change + accumulated % change
       - Subplot 3: normalized + volatility (2nd Y axis)
 
-    NOTE: Price is plotted ONLY in the first subplot to avoid Y-axis conflicts.
+    NOTE: Price is plotted ONLY in the first subplot.
     """
     df = df.copy()
     df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -85,9 +110,7 @@ def plot_enriched_price(
     stats = calculate_stats(df, price_key)
 
     # ---------- Figure & subplots ----------
-    fig, (ax_price, ax_returns, ax_norm) = plt.subplots(
-        3, 1, figsize=(14, 11), sharex=True
-    )
+    fig, (ax_price, ax_returns, ax_norm) = plt.subplots(3, 1, figsize=(14, 11), sharex=True)
 
     # =====================================================
     # SUBPLOT 1: Price + Rolling + Resampled
@@ -198,58 +221,3 @@ def plot_enriched_price(
 
     plt.savefig(out_path, format="png", dpi=300, bbox_inches="tight")
     plt.close(fig)
-
-    
-#plot volatility 
-def plot_volatility(df: pd.DataFrame, out_path: str, volatility_window: int) -> None: 
-    #price and volatility in two axes in the same plot, because they have different scales
-    df = df.copy()
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
-    volatility_col = f'volatility_{volatility_window}'
-    fig, ax1 = plt.subplots(figsize=(12,6))
-    ax1.plot(df['timestamp'], df['price'], label='Price', color='blue', linewidth=2)
-    ax1.set_xlabel('Timestamp')
-    ax1.set_ylabel('Price', color='blue')
-    ax1.tick_params(axis='y', labelcolor='blue')
-    ax2 = ax1.twinx()
-    if volatility_col in df.columns:
-        ax2.plot(df['timestamp'], df[volatility_col], label='Volatility', color='red', linewidth=2)
-    ax2.set_ylabel('Volatility', color='red')
-    ax2.tick_params(axis='y', labelcolor='red')
-    plt.title('Price and Volatility Over Time')
-    fig.tight_layout()
-    plt.grid(True)
-    plt.legend()
-    # Save in png
-    plt.savefig(out_path, format='png', dpi = 300, bbox_inches='tight')
-    plt.close()
-
-
-if __name__ == "__main__":
-    symbol = Symbol.BTC
-    currency = Currency.USD
-    days = 365
-    provider = Provider.COINGECKO
-
-    # 1) Enriched DataFrame with ALL analytics computed
-    df = compute_enriched_market_chart(
-        symbol=symbol,
-        currency=currency,
-        days=days,
-        provider=provider,
-        frequency=None,          # keep raw daily data
-        window_size=15,          # for rolling_mean_15
-        normalize_base=100.0,    # for normalized_price_base_100
-        volatility_window=15,    # for volatility_15
-    )
-
-    # 2) Single super-plot with everything
-    plot_enriched_price(
-        df=df,
-        out_path="enriched_all_analytics.png",
-        symbol=symbol,
-        currency=currency,
-        provider=provider,
-        price_key="price",
-        resample_frequency=ResampleFrequency.WEEKLY,  # only for visual simplification
-    )

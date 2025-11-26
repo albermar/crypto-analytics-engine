@@ -1,9 +1,7 @@
-from cmath import pi, sin
-
-import random
-from app.domain.entities import Symbol, Currency, MarketChartData, PricePoint, PANDAS_RESAMPLING_RULES, ResampleFrequency
+from app.domain.entities import MarketChartData, PANDAS_RESAMPLING_RULES, ResampleFrequency
 import pandas as pd
 from datetime import datetime
+
 #Analytics layer services
 
 def _validate_numeric_series(df: pd.DataFrame, column: str) -> pd.Series:
@@ -32,8 +30,8 @@ def convert_market_chart_data_to_dataframe(marketchartdata: MarketChartData) -> 
     }
     return pd.DataFrame(data)
 
+#Pandas-based analytics functions:
 
-#pandas operations block:
 def calculate_stats(df: pd.DataFrame, stats_key: str) -> dict:
     """
     Compute basic statistics for a numeric column in a price DataFrame.
@@ -135,41 +133,3 @@ def compute_volatility(df: pd.DataFrame, price_key: str, window_size: int) -> No
     
     #print(df[vol_col_name].head(30))
     # No return, modifies df in place
-    
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    sample_points = [ ]
-    for i in range(50):
-        #ensure datetimes are increasing 1 day from each other
-        p = PricePoint(timestamp=datetime(2025, 1, 1, 0, 0) + pd.Timedelta(days=i), price = 4567+10*sin(pi*i/2).real +3*i)
-        sample_points.append(p)
-    #Convert list of PricePoint to MarketChartData
-    sample_chart = MarketChartData(Symbol.BTC, Currency.USD, sample_points)
-    #Convert MarketChartData to DataFrame
-    df = convert_market_chart_data_to_dataframe(sample_chart)
-    #resample:
-    df_resampled = resample_price_series(df, 'price', ResampleFrequency.WEEKLY)
-    print('Original DataFrame:')
-    print (df)
-    print('Resampled DataFrame (Weekly):')
-    print (df_resampled)
-    
-    #Now let's test compute_volatility normalize_series trim_date_range
-    print('Testing analytics functions:')
-    df_trimmed = trim_date_range (df, datetime(2025, 3, 1), datetime(2025, 4, 11))
-    print('Trimmed DataFrame (March to June 2025):')
-    print(df_trimmed)
-    normalize_series(df, 'price', base=100.0)
-    print('Normalized price series (base 100):')
-    print(df)
-    compute_volatility(df, 'price', window_size=3)
-    print('DataFrame with 7-day volatility:')
-    print(df)
-    print(df['volatility_3'] / df.at[3, 'volatility_3'])
-    

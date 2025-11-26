@@ -16,11 +16,9 @@ from app.services.analytics import (
 from datetime import datetime
 
 DEFAULT_PROVIDER = Provider.COINGECKO
-#Business layer services
-# 1 ) Validate business rules
-# 2 ) Decides which infrastructure functions to call to fulfill the business use case
-# 3 ) Map infrastructure errors to business errors if needed
-# 4 ) Return business entities (MarketChartData, PricePoint, etc)
+# Business Logic Layer (Domain Services)
+# This layer contains business functions that orchestrate the use of entities and infrastructure functions to fulfill business use cases.
+
 
 # Use case 1: Fetch historical market data from a provider
 
@@ -46,13 +44,15 @@ def fetch_market_chart(
     
     except errors_infra.InfrastructureBadURL as e:        
         raise errors_domain.BusinessProviderGeneralError(f'Bad URL error for provider {provider}: {e}')
+    
     except errors_infra.InfrastructureValidationError as e:        
         raise errors_domain.BusinessProviderGeneralError(f'Validation error in provider {provider}: {e}')
+    
     except errors_infra.InfrastructureExternalApiError as e:        
         raise errors_domain.BusinessProviderGeneralError( f'External API error from provider {provider}: {e}')
+    
     except errors_infra.InfrastructureExternalApiTimeout as e:        
         raise errors_domain.BusinessProviderGeneralError( f'External API timeout from provider {provider}: {e}')
-    
     
     #check if the answer is MarketChartData. This is a safety check, in theory the infrastructure layer should always return the correct type.
     if not isinstance(data, MarketChartData):
@@ -131,22 +131,8 @@ def compute_enriched_market_chart(
         # 8) Optional normalization
         if normalize_base is not None:
             normalize_series(df, "price", normalize_base)
+    
     except (KeyError, ValueError) as e:
         raise errors_domain.BusinessComputationError(f'Error computing enriched market chart with pandas {e}')
     
     return df
-    
-    
-
-    
-    
-
-if __name__ == "__main__":    
-    #Simple test of the service function
-    try:
-        chart = fetch_market_chart(Symbol.BTC, Currency.USD, 20, Provider.COINGECKO)
-        print(f'Fetched {len(chart.points)} data points for {chart.symbol} in {chart.currency}')
-        for point in chart.points[-5:]:  # Print first 5 points
-            print(f'Time: {point.timestamp}, Price: {point.price}')
-    except Exception as e:
-         print(f'Error: {e}')  

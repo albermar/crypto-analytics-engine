@@ -49,6 +49,7 @@ class StatsResponse(BaseModel):
         return cls(**dict_stats) #cleaner and professional way to do it
     
     '''
+    Non-professional way to do it:
     @classmethod
     def from_dict(cls, dict_stats: dict) -> 'StatsResponse':
         count = dict_stats['count']
@@ -84,7 +85,7 @@ class DataFrameResponse(BaseModel):
         columns =  list(df.columns)
         rows = df.values.tolist()
         return cls(columns=columns, rows=rows)
-        
+     
         
         
         
