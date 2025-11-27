@@ -1,5 +1,5 @@
 
-# Crypto Analytics Backend — FastAPI, Clean Architecture & Data Visualization
+# Crypto Analytics Backend— FastAPI, Clean Architecture & Data Visualization
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi)
 ![FastAPI Routers](https://img.shields.io/badge/FastAPI-Routers%20Modular-46c0ae?logo=fastapi)
@@ -58,7 +58,7 @@ uvicorn app.api.main:app --reload
 curl "http://localhost:8000/api/v1/market_chart/?symbol=bitcoin&currency=usd&days=30&provider=coingecko"
 
 # 5. Generate enriched PNG plot
-curl -o btc.png "http://localhost:8000/api/v1/market_chart/bitcoin/usd/plot-enriched?days=60&provider=coingecko"
+curl -o btc.png "http://127.0.0.1:8000/api/v1/market_chart/bitcoin/usd/plot-enriched?days=60&provider=coingecko&window_size=10&normalize_base=25&volatility_window=5"
 ```
 
 ## 1. Motivation & Goals
