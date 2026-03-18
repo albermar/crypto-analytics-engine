@@ -1,10 +1,15 @@
 from datetime import datetime
+import os
 from app.infrastructure import errors
 from app.domain.entities import Symbol, Currency, Provider
 from app.infrastructure.mapper import map_provider_currency_id, map_provider_symbol_id
 from app.domain.entities import PricePoint, MarketChartData
 
 import httpx 
+
+#dotenv:
+from dotenv import load_dotenv
+load_dotenv() # this will load the environment variables from the .env file into the system environment variables, so we can access them using os.getenv('VAR_NAME')    
 
 # 3) High level function to get parsed market chart data from CoinGecko API -> returns MarketChartData (domain entity)
 def infra_get_parsed_market_chart_coingecko(    sym: Symbol,     curr: Currency,     days: int) -> MarketChartData:
@@ -28,7 +33,8 @@ def infra_get_raw_market_chart_coingecko(    sym: Symbol,     curr: Currency,   
     
     try:
         #Build the URL for the request:
-        URL =  f'https://api.coingecko.com/api/v3/coins/{id_sym}/market_chart'
+        api_key = os.getenv("COINGECKO_API_KEY_DEMO")
+        URL =  f'https://api.coingecko.com/api/v3/coins/{id_sym}/market_chart?x_cg_demo_api_key={api_key}'
     except errors.InfrastructureBadURL as e: #this error would be raised by us if something is wrong with the URL construction. But in this moment there is no possible error here.
         raise e  
         
