@@ -8,6 +8,8 @@
 ![pytest](https://img.shields.io/badge/tests-pytest-orange)
 ![Architecture](https://img.shields.io/badge/architecture-clean--architecture-red)
 
+![Example Plot](./outputs/XRP_EUR_COINGECKO_enriched_all_analytics.png)
+
 ## Overview
 
 Production-style **crypto analytics backend** built with **FastAPI**, **pandas**, and **Matplotlib**.
