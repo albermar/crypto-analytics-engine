@@ -25,11 +25,8 @@ It exposes multiple outputs through a clean API:
 
 A **Streamlit demo application** allows users to interactively explore the analytics engine and visualize results in real time.
 
-Live Demo: https://app-crypto.alberto.network
-
-Live API: https://api-crypto.alberto.network
-
-API Docs: https://api-crypto.alberto.network/docs
+- Demo: https://app-crypto.alberto.network
+- API Docs: https://api-crypto.alberto.network/docs
 
 
 
